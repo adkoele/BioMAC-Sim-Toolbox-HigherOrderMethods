@@ -26,7 +26,7 @@ function problem = running2D(model, resultfile, trackingData, targetSpeed, isSym
 % We can choose the number of collocation nodes.
 nNodes = 40;   
 % Most of the time we use backard euler for discretization which is encoded with 'BE'.
-Euler = 'HS2';
+Euler = 'HS1';
 % We usually use the name of the resultfile for the name of the logfile
 logfile = resultfile;
 % We want to plot intermediate results during solving of the problem.

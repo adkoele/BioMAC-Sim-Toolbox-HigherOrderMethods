@@ -109,6 +109,9 @@ if strcmp(option,'confun')
             output(ic(nv)) = xd(nv) - 1/6*(g1+4*gc+g2);
             output(ic(nmus)) = xd(nmus) - 1/6* (f1(nmus)+4*fc(nmus)+f2(nmus));
             output(ic(nc)) = xd(nc) - 1/6* (f1(nc)+4*fc(nc)+f2(nc));
+
+            %hack for scaling
+            output(ic([13 16 20 28])) = output(ic([13 16 20 28]))/100;
         end
     end
 elseif strcmp(option,'jacobian')
@@ -360,7 +363,9 @@ elseif strcmp(option,'jacobian')
 
             % derivative of constraints with respect to duration (because h is duration/(N-1))
             output(ic(nc),obj.idx.dur) = output(ic(nc),obj.idx.dur) + 1/(nNodesDur-1)*(- 1/6*(df1dh(nc,:) + 4*dfcdh(nc,:) + df2dh(nc,:)));
-
+            
+            %hack for scaling
+            output(ic([13 16 20 28]),:) = output(ic([13 16 20 28]),:)/100;
         end
         
     end
