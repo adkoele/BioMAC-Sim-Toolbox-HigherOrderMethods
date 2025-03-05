@@ -105,7 +105,7 @@ model.drag_coefficient = 0;
 isSymmetric = 1;
 initialGuess = resultFileStanding;
 problemRunning = IntroductionExamples.running2D(model, resultFileRunning, trackingData, targetSpeed, isSymmetric, initialGuess);
-problemRunning.derivativetest()
+% problemRunning.derivativetest()
 
 % If you want to check your derivatives, you can use the code below. When
 % doing so, it is best to decrease the number of nodes to, e.g., 4, to

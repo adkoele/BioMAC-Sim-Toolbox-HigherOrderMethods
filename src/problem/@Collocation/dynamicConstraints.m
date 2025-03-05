@@ -231,8 +231,8 @@ elseif strcmp(option,'jacobian')
             qc = q1+h/32*(13*v1+3*v2)+h^2/192*(11*g1-5*g2);
             dqcdq1 = speye(obj.model.nDofs) + h^2/192*(11*dg1dx1(:,nq)-5*dg2dx1(:,nq));
             dqcdq2 = h^2/192*(11*dg1dx2(:,nq)-5*dg2dx2(:,nq));
-            dqcdv1 = 13*h/32 + h^2/192*(11*dg1dx1(:,nv)-5*dg2dx1(:,nv));
-            dqcdv2 =  3*h/32 + h^2/192*(11*dg1dx2(:,nv)-5*dg2dx2(:,nv));
+            dqcdv1 = speye(obj.model.nDofs)*13*h/32 + h^2/192*(11*dg1dx1(:,nv)-5*dg2dx1(:,nv));
+            dqcdv2 =  speye(obj.model.nDofs)*3*h/32 + h^2/192*(11*dg1dx2(:,nv)-5*dg2dx2(:,nv));
             dqcdmus1 = h^2/192*(11*dg1dx1(:,nmus)-5*dg2dx1(:,nmus));
             dqcdmus2 = h^2/192*(11*dg1dx2(:,nmus)-5*dg2dx2(:,nmus));
             dqcdc1 = h^2/192*(11*dg1dx1(:,nc)-5*dg2dx1(:,nc));
