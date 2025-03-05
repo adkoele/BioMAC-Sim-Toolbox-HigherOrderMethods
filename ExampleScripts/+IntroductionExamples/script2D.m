@@ -42,42 +42,42 @@ if ~exist([path2repo,filesep,resultFolder], 'dir')
 end
 
 
-%% Standing: Simulate standing with minimal effort without tracking data for one point in time (static)
-% Create an instane of our 2D model class using the default settings
-model = Gait2dc(modelFile);
-% => We use a mex function for some functionality of the model. This was
-% automatically initialized with the correct settings for the current
-% model. (see command line output)
-
-% Call IntroductionExamples.standing2D() to specify the optimizaton problem
-% => Take a look at the function ;)
-problemStanding = IntroductionExamples.standing2D(model, resultFileStanding);
-
-% Create an object of class solver. We use most of the time the IPOPT here.
-solver = IPOPT();
-
-% Change settings of the solver
-solver.setOptionField('tol', 0.0000001);
-solver.setOptionField('constr_viol_tol', 0.000001);
-
-% Solve the optimization problem
-resultStanding = solver.solve(problemStanding);
-
-% Save the result
-resultStanding.save(resultFileStanding);
-
-% To plot the result we have to extract the states x from the result vector X
-x = resultStanding.X(resultStanding.problem.idx.states);
-
-% Now, we can plot the stick figure visualizing the result
-figure();
-resultStanding.problem.model.showStick(x);
-title('2D Standing');
-
-% If the model is standing on the toes, the optimization ends in a local optimum and not the global one. Rerun this
-% section and you should find a different solution, due to a different random
-% initial guess. You can run it a couple of times until you find a good
-% solution, standing on flat feet.
+% %% Standing: Simulate standing with minimal effort without tracking data for one point in time (static)
+% % Create an instane of our 2D model class using the default settings
+% model = Gait2dc(modelFile);
+% % => We use a mex function for some functionality of the model. This was
+% % automatically initialized with the correct settings for the current
+% % model. (see command line output)
+% 
+% % Call IntroductionExamples.standing2D() to specify the optimizaton problem
+% % => Take a look at the function ;)
+% problemStanding = IntroductionExamples.standing2D(model, resultFileStanding);
+% 
+% % Create an object of class solver. We use most of the time the IPOPT here.
+% solver = IPOPT();
+% 
+% % Change settings of the solver
+% solver.setOptionField('tol', 0.0000001);
+% solver.setOptionField('constr_viol_tol', 0.000001);
+% 
+% % Solve the optimization problem
+% resultStanding = solver.solve(problemStanding);
+% 
+% % Save the result
+% resultStanding.save(resultFileStanding);
+% 
+% % To plot the result we have to extract the states x from the result vector X
+% x = resultStanding.X(resultStanding.problem.idx.states);
+% 
+% % Now, we can plot the stick figure visualizing the result
+% figure();
+% resultStanding.problem.model.showStick(x);
+% title('2D Standing');
+% 
+% % If the model is standing on the toes, the optimization ends in a local optimum and not the global one. Rerun this
+% % section and you should find a different solution, due to a different random
+% % initial guess. You can run it a couple of times until you find a good
+% % solution, standing on flat feet.
 
 %% Running: Simulate running with minimal effort while tracking data
 % Load tracking data struct and create a TrackingData object
@@ -105,6 +105,7 @@ model.drag_coefficient = 0;
 isSymmetric = 1;
 initialGuess = resultFileStanding;
 problemRunning = IntroductionExamples.running2D(model, resultFileRunning, trackingData, targetSpeed, isSymmetric, initialGuess);
+problemRunning.derivativetest()
 
 % If you want to check your derivatives, you can use the code below. When
 % doing so, it is best to decrease the number of nodes to, e.g., 4, to

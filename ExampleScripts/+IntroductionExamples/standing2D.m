@@ -19,9 +19,6 @@ function problem = standing2D(model, resultfile)
 % Number of collocation nodes is one since we want to simulate static standing 
 % at one time point
 nNodes = 1;   
-% Discretization method is unimportant here since we do not have to compute deriatives. 
-% However, most of the time we use backard euler which is encoded with 'BE'.
-Euler = 'BE';
 % We usually use the name of the resultfile for the name of the logfile
 logfile = resultfile;
 % We want to plot intermediate results during solving of the problem.
@@ -29,7 +26,7 @@ plotLog = 1;
 
 
 %% Create collocation problem
-problem = Collocation(model, nNodes, Euler, logfile, plotLog);
+problem = Collocation(model, nNodes, 'BE', logfile, plotLog);
 
 
 %% Add states and controls including their bounds and initial values to the problem

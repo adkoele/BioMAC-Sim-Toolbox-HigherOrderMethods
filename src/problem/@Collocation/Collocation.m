@@ -108,10 +108,10 @@ classdef Collocation < Problem
             
             if nargin < 3
                 obj.Euler = 'BE';
-            elseif strcmp(Euler,'BE') || strcmp(Euler,'ME') || strcmp(Euler,'SIE')
+            elseif strcmp(Euler,'BE') || strcmp(Euler,'ME') || strcmp(Euler,'SIE') || strcmp(Euler,'HS1') || strcmp(Euler,'HS2')
                 obj.Euler = Euler;
             else
-                error('The discretization method is not in the valid range.');
+                error('The discretization method is not implemented.');
             end
             
             if nargin < 4 || isempty(logfile)
