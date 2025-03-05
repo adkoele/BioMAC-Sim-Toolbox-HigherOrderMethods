@@ -68,12 +68,12 @@ if strcmp(option,'confun')
 			output(ic) = obj.model.getDynamics(x1,xd,u2);
         % higher-order methods
 		elseif strcmp(obj.Euler, 'HS1') %First order Hermite simpson
-			f1 = obj.model.getDynamics(x1, xd, u1)+xd;
-			f2 = obj.model.getDynamics(x2, xd, u2)+xd;
+			f1 = obj.model.getDynamics(x1, zeros(size(xd)), u1);
+			f2 = obj.model.getDynamics(x2, zeros(size(xd)), u2);
 			
 			xc = 1/2*(x1+x2)+h/8*(f1-f2);
 			uc = 1/2*(u1+u2); %Is this described in the paper?
-			fc = obj.model.getDynamics(xc, xd, uc) + xd;
+			fc = obj.model.getDynamics(xc, zeros(size(xd)), uc);
 			output(ic) = xd-1/6*(f1+4*fc+f2);
         elseif strcmp(obj.Euler, 'HS2') %Second order Hermite simpson
             nq = 1:obj.model.nDofs; %this should be done nicer using the state table
@@ -156,43 +156,33 @@ elseif strcmp(option,'jacobian')
             output(ic,obj.idx.dur) = -dfdxdot' * (x2-x1) / h^2 / (nNodesDur-1);
         % higher-order methods
 		elseif strcmp(obj.Euler, 'HS1') %First order Hermite simpson
-			[notf1, df1dx, df1dxdot, df1du1] = obj.model.getDynamics(x1,xd,u1);
-            [notf2, df2dx, df2dxdot, df2du2] = obj.model.getDynamics(x2,xd,u2);
-            f1 = notf1 + xd;
-            df1dx1 = df1dx' - df1dxdot'/h - 1/h*speye(length(x1));
-            df1dx2 = df1dxdot'/h + 1/h*speye(length(x2));
-            df1dh = df1dxdot'*-(x2-x1)/h^2-(x2-x1)/h^2;
-
-            f2 = notf2 + xd;
-            df2dx1 = -df2dxdot'/h - 1/h*speye(length(x1));
-            df2dx2 = df2dx' + df2dxdot'/h + 1/h*speye(length(x2)) ;
-            df2dh = df2dxdot'*-(x2-x1)/h^2-(x2-x1)/h^2;
-
+			[f1, df1dx1, ~, df1du1] = obj.model.getDynamics(x1,zeros(size(xd)),u1);
+            [f2, df2dx2, ~, df2du2] = obj.model.getDynamics(x2,zeros(size(xd)),u2);
+            
             xc = 1/2*(x1+x2)+h/8*(f1-f2);
-            dxcdx1 = 1/2*speye(length(x1)) + h/8*(df1dx1 - df2dx1);
-            dxcdx2 = 1/2*speye(length(x2)) + h/8*(df1dx2 - df2dx2);
+            dxcdx1 = 1/2*speye(length(x1)) + h/8*(df1dx1');
+            dxcdx2 = 1/2*speye(length(x2)) + h/8*(-df2dx2');
             dxcdu1 = h/8*(df1du1');
             dxcdu2 = h/8*(-df2du2');
-            dxcdh = 1/8*(f1-f2) + h/8*(df1dh - df2dh);
+            dxcdh = 1/8*(f1-f2);
 
 			uc = 1/2*(u1+u2); %Is this described in the paper?
 
-			[~, dfcdxc, dfcdxdot, dfcduc] = obj.model.getDynamics(xc,xd,uc);
-            % fc = notfc + xd;           
-            dfcdx1 = dfcdxc'*dxcdx1 - dfcdxdot'/h - 1/h*speye(length(x1)) ;
-            dfcdx2 = dfcdxc'*dxcdx2 + dfcdxdot'/h + 1/h*speye(length(x2));
+			[~, dfcdxc, ~, dfcduc] = obj.model.getDynamics(xc,zeros(size(xd)),uc);          
+            dfcdx1 = dfcdxc'*dxcdx1;
+            dfcdx2 = dfcdxc'*dxcdx2;
             dfcdu1 = 1/2*dfcduc' + dfcdxc'*dxcdu1;
             dfcdu2 = 1/2*dfcduc' + dfcdxc'*dxcdu2;
-            dfcdh = dfcdxc'*dxcdh + dfcdxdot'*-(x2-x1)/h^2 - (x2-x1)/h^2;
+            dfcdh = dfcdxc'*dxcdh;
 
 			% output(ic) = xd-1/6*(f1+4*fc+f2);
-            output(ic,ix1) = -1/h*speye(length(x1))-1/6*(df1dx1 + 4*dfcdx1 + df2dx1);
-            output(ic,ix2) = 1/h*speye(length(x2))-1/6*(df1dx2 + 4*dfcdx2 + df2dx2);
+            output(ic,ix1) = -1/h*speye(length(x1))-1/6*(df1dx1' + 4*dfcdx1);
+            output(ic,ix2) = 1/h*speye(length(x2))-1/6*(4*dfcdx2 + df2dx2');
             output(ic,iu1) = -1/6*(df1du1' + 4*dfcdu1);
             output(ic,iu2) = -1/6*(4*dfcdu2 + df2du2');
 
             % derivative of constraints with respect to duration (because h is duration/(N-1))
-            output(ic,obj.idx.dur) = 1/(nNodesDur-1)*(-(x2-x1)/h^2 - 1/6*(df1dh + 4*dfcdh + df2dh));
+            output(ic,obj.idx.dur) = 1/(nNodesDur-1)*(-(x2-x1)/h^2 - 4/6*dfcdh);
         elseif strcmp(obj.Euler, 'HS2') %Second order Hermite simpson
             nq = 1:obj.model.nDofs; %this should be done nicer using the state table
             nv = obj.model.nDofs+1:obj.model.nDofs*2;
