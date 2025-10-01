@@ -1,9 +1,9 @@
 %======================================================================
-%> @file +MarkerTracking3D/run_motion_marker.m
-%> @brief Function to do simulation with marker tracking
+%> @file +DiscMeth/run_motion_marker_3D.m
+%> @brief Function to do simulation with angle tracking
 %>
-%> @author Marlies Nitschke
-%> @date June, 2021
+%> @author Alexander Weiss adapted from Marlies Nitschke
+%> @date July, 2025
 %======================================================================
 
 %======================================================================
@@ -16,12 +16,11 @@
 %> @param  participant       String: Name of participant (e.g. participant_02)
 %> @param  motion           String: Name of motion (e.g. straightrunning)
 %> @param  trial            String: Name of triak (e.g. trial0025)
-%> @param  WMar             String: Weight of marker tracking term in objective
-%> @param  WGRF             String: Weight of GRF tracking term in objective
-%> @param  WReg             String: Weight of the regularization term in objective
+%> @param  discMeth         String: Name of discretization method (e.g. BE or RIIa-3)
+%> @param  nNodes           Int or String: Number of Nodes (e.g. 50 or '50')
 %> @retval resultFile       String: Filename of result
 %======================================================================
-function resultFile = run_motion_marker(workDirectory, participant, motion, trial, discMeth, nNodes)
+function resultFile = run_motion_marker_3D(workDirectory, participant, motion, trial, discMeth, nNodes)
 
 % Fixed settings
 dataFolder     = ['data' filesep 'DiscMeth']; % Relative from the work directory
@@ -30,7 +29,11 @@ modelFile      = [participant filesep participant '.osim'];
 resultFolderStanding   = ['results' filesep 'DiscMeth3D' filesep participant];  % Relative from the path of the repository
 resultFolder   = ['results' filesep 'DiscMeth3D' filesep participant filesep motion filesep 'Marker' filesep discMeth];  % Relative from the path of the repository
 resultFileStanding = 'standing_marker';
-resultFile     = sprintf('%s_marker_%s_%s_nodes', trial, discMeth, int2str(nNodes));
+if isa(nNodes, 'char')
+    resultFile     = sprintf('%s_marker_%s_%s_nodes', trial, discMeth, nNodes);
+else
+    resultFile     = sprintf('%s_marker_%s_%s_nodes', trial, discMeth, int2str(nNodes));
+end
 
 % Get absolute file names
 resultFileStanding = [workDirectory filesep resultFolderStanding filesep resultFileStanding];
@@ -58,11 +61,16 @@ W.effTorques = 1e-01;        % Weight of effort term for torques in objective
 W.reg        = 1e-3;         % Weight of regularization term in objective
 initialGuess = resultFileStanding;
 nNodesEarlier = 10; %Number of time points before the actual motion of interest to ensure motion artefacts are before the motion of interest
-problemRunning = DiscMeth.setup_motion_marker(model,dataTrackFile,initialGuess,resultFile,W,nNodesEarlier, discMeth, nNodes);
+if isa(nNodes,'char')
+    nNodes = str2num(nNodes);
+end
+problemRunning = DiscMeth.setup_motion_marker_3D(model,dataTrackFile,initialGuess,resultFile,W,nNodesEarlier, discMeth, nNodes);
 
 % Solve
 solver = IPOPT();
-solver.setOptionField('max_iter', 2);
+solver.setOptionField('hsllib', '/usr/local/lib/libcoinhsl.dylib');
+solver.setOptionField('linear_solver', 'ma57');
+solver.setOptionField('max_iter', 20000);
 solver.setOptionField('tol', 0.0001);
 resultRunning = solver.solve(problemRunning);
 resultRunning.save(resultFile);

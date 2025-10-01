@@ -1,3 +1,22 @@
+%======================================================================
+%> @file    +DiscMeth/plotStabRegion.m
+%> @brief   Function to plot the stability region of a discretization method.
+%>
+%> @details
+%> This function visualizes the stability region of the specified 
+%> discretization method. The stability region is typically used 
+%> to analyze and compare the numerical properties of time 
+%> integration methods. The function generates plots that show 
+%> where the chosen discretization scheme is stable.
+%>
+%> @param   discMeth   String or struct specifying the discretization 
+%>                     method to be analyzed.
+%>
+%> @author  Alexander Weiss 
+%> @date    August, 2025
+%======================================================================
+
+
 function plotStabRegion(discMeth)
 
     FS = 15;
@@ -34,5 +53,5 @@ function plotStabRegion(discMeth)
     xlabel('Re'); ylabel('Im');
     title(['Stability Region of ', name],'FontSize', FS);
     set(gca,'FontSize',FS);
-    saveas(gcf,['/Users/alexanderweiss/Documents/Papers/Discretization/Images/StabRegion',discMeth,'.jpg']);
+    saveas(gcf,['/StabRegion',discMeth,'.jpg']);
 end

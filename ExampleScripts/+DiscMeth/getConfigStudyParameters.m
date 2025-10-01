@@ -1,5 +1,5 @@
 %======================================================================
-%> @file +MarkerTracking3D/getConfigStudyParameters.m
+%> @file +DiscMeths/getConfigStudyParameters.m
 %> @brief Get all study parameters which have to be entered here, such that
 %> they don't have to be entered multiple times in the code.
 %>

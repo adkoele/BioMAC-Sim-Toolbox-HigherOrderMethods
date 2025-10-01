@@ -15,18 +15,17 @@ classdef Collocation < Problem
     properties
         %> Model: Object of class Model.m
         model;
+        %> Double: Number of collocation nodes
+        nNodes;	
+        %> String: Midpoint euler 'ME' or backward euler 'BE' or semi-implicit euler 'SIE'
+        Euler;	
     end
 
     properties (SetAccess = private)
-        %> Double: Number of collocation nodes
-        nNodes;		
-        %> String: Midpoint euler 'ME' or backward euler 'BE' or semi-implicit euler 'SIE'
-        Euler;	
         %> Double: Number of variables that are optimized
         nVars;     		
         %> Struct: Indices for position of variables in state vector X
         idx
-        
         %> Double: Total number of constraints
         nConstraints;     	
         %> Double: Number of non-zero entries in jacobian pattern
@@ -108,7 +107,7 @@ classdef Collocation < Problem
             
             if nargin < 3
                 obj.Euler = 'BE';
-            elseif strcmp(Euler,'BE') || strcmp(Euler,'ME') || strcmp(Euler,'SIE') || strcmp(Euler,'HS1') || strcmp(Euler,'HS2')
+            elseif strcmp(Euler,'BE') || strcmp(Euler,'ME') || strcmp(Euler,'SIE')
                 obj.Euler = Euler;
             else
                 error('The discretization method is not implemented.');

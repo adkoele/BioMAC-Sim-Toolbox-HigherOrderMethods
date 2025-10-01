@@ -1,13 +1,13 @@
 %======================================================================
-%> @file +IMUTracking3D/script_PrepareModelForHPC.m
+%> @file +DiscMeth/script_PrepareForHPC.m
 %> @brief Script to read osim files and adapt the mat files for HPC
 %>
 %> @details
 %> This version overrights the old .mat files. It is therefore not
 %> necessary to copy them individually to the HPC.
 %>
-%> @author Marlies Nitschke
-%> @date March, 2022
+%> @author Alexander Weiss adapted from Marlies Nitschke
+%> @date July, 2025
 %======================================================================
 
 clear all; close all; clc;
@@ -28,7 +28,7 @@ pathOfScript = strrep(pathOfScript, '\', '/');
 pathOfScript = strsplit(pathOfScript, '/'); 
 
 % Get path of the repository
-path2repo = pathOfScript(1:end-4);         % use all but not src/scripts/+IMUTracking3D/script_PrepareModelForHPC
+path2repo = pathOfScript(1:end-3);         % use all but not src/scripts/+IMUTracking3D/script_PrepareModelForHPC
 path2repo = strjoin(path2repo, filesep);   % connect cells
 
 % Add path to repo to folders specified in the settings

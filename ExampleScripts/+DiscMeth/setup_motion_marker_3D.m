@@ -1,9 +1,9 @@
 %======================================================================
-%> @file +MarkerTracking3D/setup_motion_marker.m
-%> @brief Function to setup motion problem with marker tracking
+%> @file +DiscMeth/setup_motion_marker_3D.m
+%> @brief Function to setup motion problem with angle tracking
 %>
-%> @author Marlies Nitschke
-%> @date June, 2021
+%> @author Alexander Weiss adapted from Marlies Nitschke
+%> @date July, 2025
 %======================================================================
 
 % ======================================================================
@@ -15,9 +15,11 @@
 %> @param   resultFile     String: Filename to log files
 %> @param   W              Struct: Weights for objective terms
 %> @param   nNodesEarlier  Double: Number of samples which we start earlier
+%> @param   discMeth       String: Name of discretization method (e.g. BE or RIIa-3)
+%> @param   nNodes         Int or String: Number of Nodes (e.g. 50 or '50')
 %> @retval  problem        Collocation: Generated standing problem
 % ======================================================================
-function problem = setup_motion_marker(model,dataFile,initialFile,resultFile,W,nNodesEarlier, discMeth, nNodes)
+function problem = setup_motion_marker_3D(model,dataFile,initialFile,resultFile,W,nNodesEarlier, discMeth, nNodes)
 
 % Load tracking data
 trackingData = TrackingData.loadStruct(dataFile);
@@ -30,7 +32,7 @@ trackingData.resampleData(N);
 % Create problem
 Euler = discMeth;
 plotLog = 0;
-problem = Collocation(model,N,Euler,resultFile,plotLog);
+problem = Collocation_RK(model,N,Euler,resultFile,plotLog);
 
 % Add variables which are optimized
 states_min = repmat(model.states.xmin,1,N);
@@ -75,9 +77,6 @@ problem.addObjective(@effortTermTorques,W.effTorques,2, speedWeighting)
 problem.addObjective(@regTerm,W.reg)
 
 % Add constraints
-problem.addConstraint(@dynamicConstraintsX2,repmat(model.constraints.fmin,size(A,1),N-1),repmat(model.constraints.fmax,size(A,1),N-1), discMeth)
-problem.addConstraint(@dynamicConstraintsHOK2,repmat(model.constraints.fmin,1,N-1),repmat(model.constraints.fmax,1,N-1), discMeth)
+problem.addConstraint(@dynamicConstraintsRK,repmat(model.constraints.fmin,size(A,1)+1,N-1),repmat(model.constraints.fmax,size(A,1)+1,N-1), discMeth)
 problem.addConstraint(@dynamicsFirstNodeConstraint,model.constraints.fmin,model.constraints.fmax)
-%problem.addConstraint(@dynamicConstraints,repmat(model.constraints.fmin,1,N-1),repmat(model.constraints.fmax,1,N-1))
-
 end

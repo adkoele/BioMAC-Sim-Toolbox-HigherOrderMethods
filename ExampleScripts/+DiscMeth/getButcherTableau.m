@@ -1,5 +1,5 @@
 %==========================================================================
-%> @file getButcherTableau.m
+%> @file +DiscMeth/getButcherTableau.m
 %> @brief Returns Butcher tableau for selected implicit Runge-Kutta method
 %>
 %> @details
@@ -60,7 +60,7 @@ function [A, b, c, name] = getButcherTableau(discMeth)
             name = 'Lobatto IIIc with three stages';
 
         case 'RIIa-3'
-            % Radau IIa (s=2, p=5)
+            % Radau IIa (s=3, p=5)
             sqrt6 = sqrt(6);
 
             A = [ (88 - 7*sqrt6)/360,    (296 - 169*sqrt6)/1800, (-2 + 3*sqrt6)/225;

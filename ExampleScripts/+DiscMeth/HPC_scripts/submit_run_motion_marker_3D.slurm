@@ -9,7 +9,8 @@
 # first non-empty non-comment line ends SBATCH  options
 
 # load module (check Matlab versions with "module avail")
-module load matlab/R2023a
+module load matlab/R2022a
+module load gcc/11.2.0
 
 echo ${SUBJECT}
 echo ${MOTION}
@@ -20,8 +21,8 @@ echo ${NNODES}
 # build matlab code which should be called
 WORKDIR="'~/DiscMeth_Workdirectory/'"
 PATHIPOPT="'~/mexIPOPT/'"
-FUNCTION="DiscMeth.run_motion_angle"
-MATLABCODE="addpath(genpath(${PATHIPOPT})); addpath(genpath(${WORKDIR})); ${FUNCTION}(${WORKDIR}, '${SUBJECT}', '${MOTION}', '${TRIAL}'); quit;"
+FUNCTION="DiscMeth.run_motion_marker_3D"
+MATLABCODE="addpath(genpath(${PATHIPOPT})); addpath(genpath(${WORKDIR})); ${FUNCTION}(${WORKDIR}, '${SUBJECT}', '${MOTION}', '${TRIAL}', '${DISCMETH}', '${NNODES}'); quit;"
 echo ${MATLABCODE}
 
 # submit job

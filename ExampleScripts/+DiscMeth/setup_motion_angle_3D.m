@@ -1,9 +1,9 @@
 %======================================================================
-%> @file +MarkerTracking3D/setup_motion_angle.m
+%> @file +DiscMeth/setup_motion_angle_3D.m
 %> @brief Function to setup motion problem with angle tracking
 %>
-%> @author Marlies Nitschke
-%> @date December, 2021
+%> @author Alexander Weiss adapted from Marlies Nitschke
+%> @date July, 2025
 %======================================================================
 
 % ======================================================================
@@ -16,9 +16,11 @@
 %> @param   resultFile     String: Filename to log files
 %> @param   W              Struct: Weights for objective terms
 %> @param   nNodesEarlier  Double: Number of samples which we start earlier
+%> @param   discMeth       String: Name of discretization method (e.g. BE or RIIa-3)
+%> @param   nNodes         Int or String: Number of Nodes (e.g. 50 or '50')
 %> @retval  problem        Collocation: Generated standing problem
 % ======================================================================
-function problem = setup_motion_angle(model,dataInvFile,dataMeasFile,initialFile,resultFile,W, nNodesEarlier, discMeth, nNodes)
+function problem = setup_motion_angle_3D(model,dataInvFile,dataMeasFile,initialFile,resultFile,W, nNodesEarlier, discMeth, nNodes)
 
 N = nNodes;
 % Load tracking data
@@ -30,13 +32,14 @@ trackingDataInv.resampleData(N);
 trackingDataMeas = TrackingData.loadStruct(dataMeasFile);
 indicesStartEnd = trackingDataMeas.movementEvents.index(strcmp(trackingDataMeas.movementEvents.name, 'R_IC'));
 trackingDataMeas.trimData(indicesStartEnd(1)-nNodesEarlier, indicesStartEnd(2)-1);
+initSamples = trackingDataMeas.nSamples;
 trackingDataMeas.resampleData(N);
 %trackingDataMeas.nSamples;
 
 % Create problem
 Euler = discMeth;
-plotLog = 0;
-problem = Collocation(model,N,Euler,resultFile,plotLog);
+plotLog = 1;
+problem = Collocation_RK(model,N,Euler,resultFile,plotLog);
 
 % Add variables which are optimized
 states_min = repmat(model.states.xmin,1,N);
@@ -62,7 +65,7 @@ for n_k = 1:size(A,1)
 end
 
 h = 1/175; % 175 Hz
-targetdur =  h*(N-1);
+targetdur =  h*(initSamples-1);
 problem.addOptimVar('dur',targetdur,targetdur);
 
 % Initialize the problem with an old result specified in initialFile
@@ -87,9 +90,7 @@ problem.addObjective(@effortTermTorques,W.effTorques,2, speedWeighting)
 problem.addObjective(@regTerm,W.reg)
 
 % Add constraints
-problem.addConstraint(@dynamicConstraintsX2,repmat(model.constraints.fmin,size(A,1),N-1),repmat(model.constraints.fmax,size(A,1),N-1), discMeth)
-problem.addConstraint(@dynamicConstraintsHOK2,repmat(model.constraints.fmin,1,N-1),repmat(model.constraints.fmax,1,N-1), discMeth)
-problem.addConstraint(@dynamicsFirstNodeConstraint,model.constraints.fmin,model.constraints.fmax)
 %problem.addConstraint(@dynamicConstraints,repmat(model.constraints.fmin,1,N-1),repmat(model.constraints.fmax,1,N-1))
-
+problem.addConstraint(@dynamicConstraintsRK,repmat(model.constraints.fmin,size(A,1)+1,N-1),repmat(model.constraints.fmax,size(A,1)+1,N-1), discMeth)
+problem.addConstraint(@dynamicsFirstNodeConstraint,model.constraints.fmin,model.constraints.fmax)
 end

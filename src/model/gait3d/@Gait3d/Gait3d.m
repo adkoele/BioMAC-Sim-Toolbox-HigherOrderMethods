@@ -132,6 +132,7 @@ classdef Gait3d < Model
             % Get dynamics   
             if nargout > 3
             
+                
                 [f, dfdx, dfdxdot, dfdumus, dfdMextra] = obj.hdlMEX('Dynamics',x,xdot,umus,Mextra);
                 
                 % Get dfdu from dfdumus and dfdMextra

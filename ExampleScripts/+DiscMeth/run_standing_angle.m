@@ -1,9 +1,9 @@
 %======================================================================
-%> @file +MarkerTracking3D/run_standing_angle.m
+%> @file +DiscMeth/run_standing_angle.m
 %> @brief Function to do standing simulation with angle tracking
 %>
-%> @author Marlies Nitschke
-%> @date December, 2021
+%> @author Alexander Weiss adapted from Marlies Nitschke
+%> @date December, 2021, July 2025
 %======================================================================
 
 %======================================================================
@@ -13,39 +13,53 @@
 %> This function tracks data during standing to optimize the CP position.
 %>
 %> @param  workDirectory    String: Current work directory
-%> @param  participant          String: Name of participant (e.g. participant_02)
+%> @param  participant      String: Name of participant (e.g. participant_02)
 %> @param  trial            String: Name of trial (e.g. trial0002)
-%> @param  WTra             String: Weight of translation tracking term in objective
-%> @param  WAng             String: Weight of angle tracking term in objective
-%> @param  WGRF             String: Weight of GRF tracking term in objective
+%> @param  dim              String: Simulation dimension, either '2D' or '3D'
+%>
 %> @retval resultFile       String: Filename of result
 %======================================================================
-function resultFile = run_standing_angle(workDirectory, participant, trial)
+function resultFile = run_standing_angle(workDirectory, participant, trial, dim)
 
 % Fixed settings
 dataFolder     = ['data' filesep 'DiscMeth']; % Relative from the work directory
 dataMeasFile   = [participant filesep 'N-Pose' filesep trial '_DataStructMeasured.mat'];
 dataInvFile    = [participant filesep 'N-Pose' filesep trial '_DataStructInverse.mat'];
-modelFile      = [participant filesep participant '.osim'];
-resultFolder   = ['results' filesep 'DiscMeth3D' filesep participant];  % Relative from the path of the repository
+if strcmp(dim, '2D')
+    modelFile   = 'gait2dc_par.xls'; 
+    resultFolder   = ['results' filesep 'DiscMeth2D' filesep participant];  % Relative from the path of the repository
+    resultFile   = [workDirectory filesep resultFolder filesep 'standing_angle_2D'];
+elseif strcmp(dim, '3D')
+    modelFile      = [participant filesep participant '.osim'];
+    resultFolder   = ['results' filesep 'DiscMeth3D' filesep participant];  % Relative from the path of the repository
+    resultFile   = [workDirectory filesep resultFolder filesep 'standing_angle_3D'];
+else
+    error('Please specify either 2D or 3D as dimension');
+end
 
 % Get absolute file names
-resultFile   = [workDirectory filesep resultFolder filesep 'standing_angle'];
 dataMeasFile = [workDirectory filesep dataFolder filesep dataMeasFile];
 dataInvFile  = [workDirectory filesep dataFolder filesep dataInvFile];
-modelFile    = [workDirectory filesep dataFolder filesep modelFile];
-
+if strcmp(dim, '3D')
+    modelFile    = [workDirectory filesep dataFolder filesep modelFile];
+end
 % Create resultfolder if it does not exist
 if ~exist([workDirectory,filesep,resultFolder], 'dir')
     mkdir([workDirectory,filesep,resultFolder]);
 end
 
-% Create an instane of our 3D model class
-model = Gait3d(modelFile);
+% Create an instane of our 2D or 3D model class
+if strcmp(dim, '2D')
+    model = Gait2dc(modelFile);
+elseif strcmp(dim, '3D')
+    model = Gait3d(modelFile);
+else
+    error('Please specify either 2D or 3D as dimension');
+end
 
 % Solve simulation for multiple random initial guesses
 rng('default');
-nRep = 1;
+nRep = 10;
 results = cell(nRep, 1);
 objSum = nan(nRep, 1);
 for iRep = 1 : nRep
@@ -57,11 +71,15 @@ for iRep = 1 : nRep
     W.trackGRF   = 1e-2;        % Weight of GRF tracking term in objective
     W.effMuscles = 1e+00;       % Weight of effort term for muscles in objective
     W.effTorques = 1e-01;       % Weight of effort term for torques in objective
-    problemStanding = DiscMeth.setup_standing_angle(model, dataInvFile, dataMeasFile, iSample, resultFile, W);
-    
+    if strcmp(dim, '3D')
+        problemStanding = DiscMeth.setup_standing_angle(model, dataInvFile, dataMeasFile, iSample, resultFile, W);
+    elseif strcmp(dim, '2D')
+        problemStanding = DiscMeth.standing_2D(model, resultFile);
+    end
+
     % Solve
     solver = IPOPT();
-    solver.setOptionField('max_iter', 20);
+    solver.setOptionField('max_iter', 20000);
     solver.setOptionField('tol', 0.0001);
     results{iRep} = solver.solve(problemStanding);
     objSum(iRep) = sum([results{iRep}.problem.objectiveTerms.weightedValue]);

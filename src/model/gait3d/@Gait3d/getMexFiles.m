@@ -70,7 +70,9 @@ if ispc % true for windows
     objext = 'obj';
 elseif isunix % true for Linux and Mac
     objext = 'o';
-    mexoptUNIX = 'GCC=''/usr/bin/gcc''';
+    gccPath = mex.getCompilerConfigurations('C','Selected').Location;
+    mexoptUNIX =  ['GCC=''' gccPath ''''];
+    %'GCC=''/usr/bin/gcc''';
 else
     error('System is unknown');
 end

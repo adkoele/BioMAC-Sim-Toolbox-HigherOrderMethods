@@ -26,7 +26,7 @@ function problem = running2D(model, resultfile, trackingData, targetSpeed, isSym
 % We can choose the number of collocation nodes.
 nNodes = 40;   
 % Most of the time we use backard euler for discretization which is encoded with 'BE'.
-Euler = 'HS1';
+Euler = 'BE';
 % We usually use the name of the resultfile for the name of the logfile
 logfile = resultfile;
 % We want to plot intermediate results during solving of the problem.
@@ -34,7 +34,7 @@ plotLog = 1;
 
 
 %% 2. Create collocation problem
-problem = Collocation(model, nNodes, Euler, logfile, plotLog);
+problem = Collocation_RK(model, nNodes, Euler, logfile, plotLog);
 
 
 %% 3. Add states and controls including their bounds and initial values to the problem
@@ -113,11 +113,23 @@ problem.addObjective(@regTerm, Wreg);
 %% 5. Add constraints to the problem
 % Similar to the standing simulation, we have to ensure that the dynamic
 % constraints of the model are fullfiled. 
-problem.addConstraint(@dynamicConstraints,repmat(model.constraints.fmin,1,nNodes),repmat(model.constraints.fmax,1,nNodes))
+%problem.addConstraint(@dynamicConstraints,repmat(model.constraints.fmin,1,nNodes),repmat(model.constraints.fmax,1,nNodes))
 
 % Furthermore, we now that a gait cycle is a period movement. We use this
 % knowledge to limit the possible soluations.
 problem.addConstraint(@periodicityConstraint,zeros(model.nStates+model.nControls,1),zeros(model.nStates+model.nControls,1),isSymmetric)
+
+xmin_mit = repmat(model.states.xmin, 1, nNodes);
+xmax_mit = repmat(model.states.xmax, 1, nNodes);
+discMeth = 'BE';
+% Butcher Tableau
+[A, b, c] = DiscMeth.getButcherTableau(discMeth);
+for n_k = 1:size(A,1)
+    x_states = ['xk', int2str(n_k), '_states'];
+    problem.addOptimVar(x_states, xmin_mit, xmax_mit);
+end
+
+problem.addConstraint(@dynamicConstraintsRK,repmat(model.constraints.fmin,size(A,1)+1,nNodes),repmat(model.constraints.fmax,size(A,1)+1,nNodes), discMeth)
 
 
 end

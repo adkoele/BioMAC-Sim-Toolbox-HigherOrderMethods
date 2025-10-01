@@ -44,27 +44,27 @@ end
 
 % %% Standing: Simulate standing with minimal effort without tracking data for one point in time (static)
 % % Create an instane of our 2D model class using the default settings
-% model = Gait2dc(modelFile);
-% % => We use a mex function for some functionality of the model. This was
-% % automatically initialized with the correct settings for the current
-% % model. (see command line output)
-% 
-% % Call IntroductionExamples.standing2D() to specify the optimizaton problem
-% % => Take a look at the function ;)
-% problemStanding = IntroductionExamples.standing2D(model, resultFileStanding);
-% 
-% % Create an object of class solver. We use most of the time the IPOPT here.
-% solver = IPOPT();
-% 
-% % Change settings of the solver
-% solver.setOptionField('tol', 0.0000001);
-% solver.setOptionField('constr_viol_tol', 0.000001);
-% 
+model = Gait2dc(modelFile);
+% => We use a mex function for some functionality of the model. This was
+% automatically initialized with the correct settings for the current
+% model. (see command line output)
+
+% Call IntroductionExamples.standing2D() to specify the optimizaton problem
+% => Take a look at the function ;)
+problemStanding = IntroductionExamples.standing2D(model, resultFileStanding);
+
+% Create an object of class solver. We use most of the time the IPOPT here.
+solver = IPOPT();
+
+% Change settings of the solver
+solver.setOptionField('tol', 0.0000001);
+solver.setOptionField('constr_viol_tol', 0.000001);
+
 % % Solve the optimization problem
-% resultStanding = solver.solve(problemStanding);
+resultStanding = solver.solve(problemStanding);
 % 
 % % Save the result
-% resultStanding.save(resultFileStanding);
+resultStanding.save(resultFileStanding);
 % 
 % % To plot the result we have to extract the states x from the result vector X
 % x = resultStanding.X(resultStanding.problem.idx.states);
