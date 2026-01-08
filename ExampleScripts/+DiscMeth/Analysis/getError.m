@@ -49,10 +49,10 @@ LineWidth = 4;
 
 % Interpolation points between collocation nodes
 testJoint = 'knee_angle_r';%'pelvis_ty';%
-plotError = 1;
+plotError = 0;
 plotAllTime = 0; % 0: plot Fraction, 1: plot First Order, 2: plot Second order, 3: plot third Order
 
-plotAll = 0;
+plotAll = 1;
 
 startNode = 0;
 endNode = 10;
@@ -383,7 +383,7 @@ for iMov = 1:size(movements,2)
                 end
             end            
         end
-       % DiscMeth.analyzeANOVA([path2repo, filesep, resultFolder], dynResTable, movements{1,iMov}, dim,FontName, FontSize);
+        %DiscMeth.analyzeANOVA([path2repo, filesep, resultFolder], dynResTable, movements{1,iMov}, dim,FontName, FontSize);
 
         
         if plotAll == 1
